@@ -1,0 +1,56 @@
+policy_id: "policygate-mvp"
+policy_version: "2026-03-02.1"
+
+default:
+  decision: "BLOCK"
+  rationale_codes:
+    - "POLICY_DEFAULT_DENY"
+
+rules:
+  - rule_id: "allow_infer_public"
+    priority: 100
+    when:
+      action: "infer:run"
+      resource:
+        sensitivity: "public"
+    then:
+      decision: "ALLOW"
+      rationale_codes:
+        - "ALLOW_PUBLIC_INFER"
+
+  - rule_id: "degrade_infer_restricted_cap_output"
+    priority: 90
+    when:
+      action: "infer:run"
+      resource:
+        sensitivity: "restricted"
+    then:
+      decision: "DEGRADE"
+      rationale_codes:
+        - "SENSITIVE_OUTPUT_LIMIT"
+      obligations:
+        - type: "OUTPUT_CAP"
+          params:
+            max_tokens: 200
+
+  - rule_id: "review_policy_admin_prod"
+    priority: 80
+    when:
+      action: "policy:admin"
+      env:
+        name: "prod"
+    then:
+      decision: "REQUIRE_REVIEW"
+      rationale_codes:
+        - "ADMIN_CHANGE_REQUIRES_APPROVAL"
+
+  - rule_id: "block_tool_low_trust"
+    priority: 70
+    when:
+      action: "tool:invoke"
+      signals:
+        caller_trust: "low"
+    then:
+      decision: "BLOCK"
+      rationale_codes:
+        - "TOOL_CALL_LOW_TRUST"

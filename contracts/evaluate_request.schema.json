@@ -1,0 +1,134 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://policygate.local/contracts/evaluate_request.schema.json",
+  "title": "PolicyGate EvaluateRequest v1",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "action",
+    "env",
+    "resource"
+  ],
+  "properties": {
+    "request_id": {
+      "type": "string",
+      "description": "Optional correlation id provided by caller. If omitted, PolicyGate will generate one.",
+      "minLength": 1,
+      "maxLength": 128
+    },
+    "timestamp": {
+      "type": "string",
+      "description": "Optional ISO-8601 timestamp from caller.",
+      "format": "date-time"
+    },
+    "action": {
+      "type": "string",
+      "description": "Capability-level action being requested. Must be one of the fixed action vocabulary.",
+      "enum": [
+        "infer:run",
+        "data:read",
+        "data:write",
+        "tool:invoke",
+        "policy:admin"
+      ]
+    },
+    "env": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "name"
+      ],
+      "properties": {
+        "name": {
+          "type": "string",
+          "description": "Environment name (e.g., local/dev/stage/prod). Treated as an opaque string by PolicyGate.",
+          "minLength": 1,
+          "maxLength": 64,
+          "pattern": "^[a-zA-Z0-9][a-zA-Z0-9._-]{0,63}$"
+        }
+      }
+    },
+    "resource": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "type",
+        "sensitivity"
+      ],
+      "properties": {
+        "type": {
+          "type": "string",
+          "description": "Resource class being accessed (domain-specific, e.g. model_endpoint, patient_record, tool, dataset).",
+          "minLength": 1,
+          "maxLength": 64,
+          "pattern": "^[a-zA-Z][a-zA-Z0-9._-]{0,63}$"
+        },
+        "id": {
+          "type": "string",
+          "description": "Optional resource identifier.",
+          "minLength": 1,
+          "maxLength": 256
+        },
+        "sensitivity": {
+          "type": "string",
+          "description": "Coarse sensitivity label used for portable policies.",
+          "enum": [
+            "public",
+            "internal",
+            "restricted"
+          ]
+        }
+      }
+    },
+    "subject": {
+      "type": "object",
+      "description": "Optional actor/principal metadata. PolicyGate treats these as opaque identifiers for matching in policy.",
+      "additionalProperties": false,
+      "properties": {
+        "type": {
+          "type": "string",
+          "description": "Actor class (e.g., user, service, system).",
+          "minLength": 1,
+          "maxLength": 32,
+          "pattern": "^[a-zA-Z][a-zA-Z0-9._-]{0,31}$"
+        },
+        "id": {
+          "type": "string",
+          "description": "Actor identifier (e.g. user id, service name).",
+          "minLength": 1,
+          "maxLength": 256
+        }
+      }
+    },
+    "signals": {
+      "type": "object",
+      "description": "Extension point for environment-specific risk signals. Keys are bounded; values are simple scalars. Policies may match on these keys.",
+      "default": {},
+      "maxProperties": 50,
+      "propertyNames": {
+        "type": "string",
+        "pattern": "^[a-z][a-z0-9_]{0,40}$"
+      },
+      "additionalProperties": {
+        "oneOf": [
+          {
+            "type": "string",
+            "maxLength": 256
+          },
+          {
+            "type": "number"
+          },
+          {
+            "type": "integer"
+          },
+          {
+            "type": "boolean"
+          },
+          {
+            "type": "null"
+          }
+        ]
+      }
+    }
+  }
+}
