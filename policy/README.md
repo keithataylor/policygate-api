@@ -47,6 +47,12 @@ Those are fixed by PolicyGate contracts and validated by schema.
 
 ---
 
+## OUTPUT CAP
+
+PEP enforces OUTPUT_CAP at generation-time if possible; if not possible, it fails closed (BLOCK)
+
+---
+
 ## Minimal example
 
 ```yaml
