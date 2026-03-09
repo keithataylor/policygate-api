@@ -38,6 +38,8 @@ Typically **engineers** (platform/security/ML platform) edit `policy.yaml`, beca
 - rule outcomes in `then` (decision, rationale codes)
 - obligation parameters (e.g. `OUTPUT_CAP.max_tokens`)
 
+Policy can change decisions/thresholds/conditions, but cannot introduce new obligation types. New obligation types require a code release (PDP + PEP support).
+
 You do **not** change:
 - decision meanings
 - API request/response shapes
