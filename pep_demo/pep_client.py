@@ -29,7 +29,9 @@ summarise = SummariseBody(
     caller_trust="low"
 )   
 
-# 
+# Call the PEP's summarise endpoint with the input data. The PEP will forward this to the PDP for evaluation.
+# http://localhost:9000/summarise simulates the PEP's endpoint for handling summarisation requests. 
+# In a real application, this would be the actual URL of the PEP service.
 try:
     with requests.Session() as session:
         summarise_response = session.post(
