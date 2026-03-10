@@ -1,7 +1,55 @@
+####################################################################################################################
+#   pep_client.py 
+#   Simple demonstration to show how a client application might interact with the PEP and PDP services. 
+#   The input is hardcoded for demonstration purposes, but in a real application, inputs would likely come 
+#   from the application's context, user input, or other sources.
+#   Here we assume a user is trying to summarise a document, and we want to evaluate the policy for that action.
+#   The client sends a request to the PEP, which forwards it to the PDP for evaluation. The PDP returns a decision,
+#   and the client handles that decision accordingly.
+#######################################################################################################################
 from pydantic import BaseModel
-
 from policygate.models import Decision
 import requests
+
+# Simple Pydantic model to represent the request body for the summarise endpoint. 
+# In a real application, this would likely be more complex and include additional fields as needed.
+class SummariseBody(BaseModel):
+    document_id: str
+    env_name: str
+    user_id: str | None = None
+    sensitivity: str
+    caller_trust: str | None = None
+
+# For demonstration purposes, we will hardcode the input values.
+summarise = SummariseBody(
+    document_id="123",
+    env_name="development",
+    user_id="456",
+    sensitivity="public",
+    caller_trust="low"
+)   
+
+# 
+try:
+    with requests.Session() as session:
+        summarise_response = session.post(
+            "http://localhost:9000/summarise",
+            json=summarise.model_dump(),
+            timeout=10,
+        )
+        summarise_response.raise_for_status()
+except requests.exceptions.RequestException as e:
+    print(f"An error occurred while making the request to the PEP: {e}")
+    raise SystemExit(1)
+
+
+
+print(f"Response status code: {summarise_response.status_code}, {summarise_response.reason}") 
+
+decision = Decision(summarise_response.json()["decision"])
+
+print(f"Response Decision: {decision}") 
+
 
 def decision_allow_handler():
     print("This is a placeholder for handling ALLOW decisions.")
@@ -15,33 +63,6 @@ def decision_require_review_handler():
 def decision_degrade_handler():
     print("This is a placeholder for handling DEGRADE decisions.")
 
-
-# This is a simple demonstration of how a client application might interact with the PEP and PDP services.
-
-class SummariseBody(BaseModel):
-    document_id: str
-    env_name: str
-    user_id: str | None = None
-    sensitivity: str
-    caller_trust: str | None = None
-
-summarise = SummariseBody(
-    document_id="123",
-    env_name="development",
-    user_id="456",
-    sensitivity="public",
-    caller_trust="low"
-)   
-
-with requests.Session() as session: 
-    summarise_response = session.post(url="http://localhost:9000/summarise", json=summarise.model_dump())  # Use model_dump() to convert Pydantic model to dict
-
-
-print(f"Response status code: {summarise_response.status_code}, {summarise_response.reason}") 
-
-decision = Decision(summarise_response.json()["decision"])
-
-print(f"Response Decision: {decision}") 
 
 match decision:
     case Decision.ALLOW:
