@@ -1,8 +1,8 @@
 from fastapi import FastAPI
 from pydantic import BaseModel
-from policygate.models import Decision, EvaluateResponseV1
+from policygate.models import Action, Decision, EvaluateRequestV1, EvaluateResponseV1
 import policygate_pep.enforcer as pep
-from policygate_pep.mappers import build_evaluate_request_for_summarise
+from policygate_pep.mappers import build_evaluate_request
 
 # Simple Pydantic model (recommended) to represent the request body for the summarise endpoint.
 class SummariseBody(BaseModel):
@@ -11,6 +11,30 @@ class SummariseBody(BaseModel):
     user_id: str | None = None
     sensitivity: str
     caller_trust: str | None = None
+
+# Helper function to build the EvaluateRequestV1 for the summarise action based on the incoming request data.
+def build_evaluate_request_for_summarise(
+        *,
+        document_id: str,
+        env_name: str,
+        user_id: str | None,
+        sensitivity: str,
+        request_id: str | None = None,
+        caller_trust: str | None = None,
+    ) -> EvaluateRequestV1:
+
+    eval_request = build_evaluate_request(
+        action=Action.INFER_RUN,
+        env_name=env_name,
+        resource_type="document",
+        resource_sensitivity=sensitivity,
+        resource_id=document_id,
+        subject_type="user" if user_id else None,
+        subject_id=user_id,
+        request_id=request_id,
+        signals={"caller_trust": caller_trust} if caller_trust else {}
+    )
+    return eval_request
 
 
 pep_service_app = FastAPI()
@@ -44,7 +68,7 @@ async def summarise(payload: SummariseBody):
         on_require_review=handle_require_review,
         timeout_seconds=5.0
     )
-    print(f"PEP Enforcer result: {result['summary']}, Decision: {result['decision']}, Message: {result['message']}")
+    #print(f"PEP Enforcer result: {result['summary']}, Decision: {result['decision']}, Message: {result['message']}")
     return result
 
 
@@ -56,9 +80,10 @@ def handle_allow(evaluate_response: EvaluateResponseV1):
     #Add ALLOW logic here ...
 
     result = {
-        "summary": evaluate_response.rationale_codes[0],
+        "outcome": "success",
         "decision": Decision(evaluate_response.decision),
-        "message": "Processed action Allowed."
+        "rationale": evaluate_response.rationale_codes[0],
+        "summary": "Processed action Allowed."
     }
     return result
 
@@ -67,9 +92,10 @@ def handle_block(evaluate_response: EvaluateResponseV1):
     # Add BLOCK logic here ...
 
     result = {
-        "summary": evaluate_response.rationale_codes[0],
+        "outcome": "denied",
         "decision": Decision(evaluate_response.decision),
-        "message": "Action blocked. Access denied."
+        "rationale": evaluate_response.rationale_codes[0],
+        "summary": "Action blocked. Access denied."
     }
     return result
 
@@ -78,9 +104,10 @@ def handle_require_review(evaluate_response: EvaluateResponseV1):
     # Add REQUIRE_REVIEW logic here ...
 
     result = {
-        "summary": evaluate_response.rationale_codes[0],
+        "outcome": "denied",
         "decision": Decision(evaluate_response.decision),
-        "message": "Action requires review. Access pending."
+        "rationale": evaluate_response.rationale_codes[0],
+        "summary": "Action requires review. Access pending."
     }
     return result
 
@@ -89,9 +116,10 @@ def handle_degrade(evaluate_response: EvaluateResponseV1):
     # Add DEGRADE logic here ...
 
     result = {
-        "summary": evaluate_response.rationale_codes[0],
+        "outcome": "success",
         "decision": Decision(evaluate_response.decision),
+        "rationale": evaluate_response.rationale_codes[0],
         "obligations": evaluate_response.obligations,
-        "message": "Action degraded. Proceeded with limited functionality..."
+        "summary": "Action degraded. Proceeded with limited functionality..."
     }
     return result
