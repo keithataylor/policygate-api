@@ -2,7 +2,7 @@ import os
 from fastapi import FastAPI
 from pydantic import BaseModel
 from policygate.models import Action, Decision, EvaluateRequestV1, EvaluateResponseV1
-import policygate_pep.enforcer as enforcer
+import policygate_pep.enforcer as pep
 import policygate_pep.mappers as mapper
 
 POLICYGATE_EVAL_HOST = os.getenv("POLICYGATE_EVAL_HOST", "localhost")
@@ -46,7 +46,7 @@ async def summarise(payload: SummariseBody):
     )
       
     # Call the PEP enforcer with the evaluation request, PDP URL, and handlers for each possible decision.
-    result = enforcer.enforce(
+    result = pep.enforce(
         evaluate_request=summarise_request.model_dump(),
         pdp_url=PDP_EVALUATE_URL,
         on_allow=handle_allow,
