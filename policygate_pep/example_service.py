@@ -1,8 +1,14 @@
+import os
 from fastapi import FastAPI
 from pydantic import BaseModel
 from policygate.models import Action, Decision, EvaluateRequestV1, EvaluateResponseV1
-import policygate_pep.enforcer as pep
-from policygate_pep.mappers import build_evaluate_request
+import policygate_pep.enforcer as enforcer
+import policygate_pep.mappers as mapper
+
+POLICYGATE_EVAL_HOST = os.getenv("POLICYGATE_EVAL_HOST", "localhost")
+POLICYGATE_EVAL_PORT = int(os.getenv("POLICYGATE_EVAL_PORT", "8000"))
+PDP_EVALUATE_URL = f"http://{POLICYGATE_EVAL_HOST}:{POLICYGATE_EVAL_PORT}/evaluate"
+
 
 # Simple Pydantic model (recommended) to represent the request body for the summarise endpoint.
 class SummariseBody(BaseModel):
@@ -12,56 +18,37 @@ class SummariseBody(BaseModel):
     sensitivity: str
     caller_trust: str | None = None
 
-# Helper function to build the EvaluateRequestV1 for the summarise action based on the incoming request data.
-def build_evaluate_request_for_summarise(
-        *,
-        document_id: str,
-        env_name: str,
-        user_id: str | None,
-        sensitivity: str,
-        request_id: str | None = None,
-        caller_trust: str | None = None,
-    ) -> EvaluateRequestV1:
-
-    eval_request = build_evaluate_request(
-        action=Action.INFER_RUN,
-        env_name=env_name,
-        resource_type="document",
-        resource_sensitivity=sensitivity,
-        resource_id=document_id,
-        subject_type="user" if user_id else None,
-        subject_id=user_id,
-        request_id=request_id,
-        signals={"caller_trust": caller_trust} if caller_trust else {}
-    )
-    return eval_request
-
-
+# FastAPI app instance for the example service that will call the PEP enforcer.
 pep_service_app = FastAPI()
 
-
+# Example health endpoint to check if the service is running.
 @pep_service_app.get("/health")
 async def health():
     return {"status": "OK"}  
 
-# Example endpoint to handle the document summarisation requests. 
+# Example endpoint to handle a document summarisation ML inference requests. 
+# For ML inference, the action in the evaluation request is set to Action.INFER_RUN.
 @pep_service_app.post("/summarise")
 async def summarise(payload: SummariseBody): 
     
-    # Build the policy evaluation request based on the incoming summarisation request
-    # The result is in the required EvaluateRequestV1 format for the PDP /evaluate endpoint.
-    summarise_request = build_evaluate_request_for_summarise(
-        document_id=payload.document_id,
+    # Use the mapper helper function to build the policy evaluation request based on 
+    # the incoming summarisation request. The result is in the required EvaluateRequestV1 
+    # format for the PDP /evaluate endpoint.
+    summarise_request = mapper.build_evaluate_request(
+        action=Action.INFER_RUN,
         env_name=payload.env_name,
-        user_id=payload.user_id,
-        sensitivity=payload.sensitivity,
-        caller_trust=payload.caller_trust
+        resource_type="document",
+        resource_sensitivity=payload.sensitivity,
+        resource_id=payload.document_id,
+        subject_id=payload.user_id,
+        request_id=None,
+        signals={"caller_trust": payload.caller_trust} if payload.caller_trust else {}
     )
       
     # Call the PEP enforcer with the evaluation request, PDP URL, and handlers for each possible decision.
-    result = pep.enforce(
+    result = enforcer.enforce(
         evaluate_request=summarise_request.model_dump(),
-        pdp_url="http://localhost:8000/evaluate",
+        pdp_url=PDP_EVALUATE_URL,
         on_allow=handle_allow,
         on_degrade=handle_degrade,
         on_block=handle_block,
@@ -114,6 +101,9 @@ def handle_require_review(evaluate_response: EvaluateResponseV1):
 def handle_degrade(evaluate_response: EvaluateResponseV1):
 
     # Add DEGRADE logic here ...
+    # For this case you would typically check and handle the obligations returned.
+    # E.g., 'obligations': [{'type': 'OUTPUT_CAP', 'params': {'max_tokens': 200, 'max_items': None, 'max_bytes': None}} 
+    # See customer-defined policy/policy.yaml
 
     result = {
         "outcome": "success",
