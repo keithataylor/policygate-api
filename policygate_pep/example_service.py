@@ -1,11 +1,12 @@
 import os
+from time import perf_counter
 from fastapi import FastAPI
 from pydantic import BaseModel
 from policygate.models import Action, Decision, EvaluateRequestV1, EvaluateResponseV1
 import policygate_pep.enforcer as pep
 import policygate_pep.mappers as mapper
 
-POLICYGATE_EVAL_HOST = os.getenv("POLICYGATE_EVAL_HOST", "localhost")
+POLICYGATE_EVAL_HOST = os.getenv("POLICYGATE_EVAL_HOST", "127.0.0.1")
 POLICYGATE_EVAL_PORT = int(os.getenv("POLICYGATE_EVAL_PORT", "8000"))
 PDP_EVALUATE_URL = f"http://{POLICYGATE_EVAL_HOST}:{POLICYGATE_EVAL_PORT}/evaluate"
 
@@ -63,7 +64,7 @@ async def summarise(payload: SummariseBody):
 # Handlers for each possible decision from the PDP.
 # the handler names must match the names passed to the enforce function above. 
 def handle_allow(evaluate_response: EvaluateResponseV1):
-
+    start = perf_counter()
     #Add ALLOW logic here ...
 
     result = {
@@ -72,10 +73,12 @@ def handle_allow(evaluate_response: EvaluateResponseV1):
         "rationale": evaluate_response.rationale_codes[0],
         "summary": "Processed action Allowed."
     }
+    end = perf_counter()
+    print(f"handle_allow logic took: {end - start:.2f} seconds")
     return result
 
 def handle_block(evaluate_response: EvaluateResponseV1):
-
+    start = perf_counter()  
     # Add BLOCK logic here ...
 
     result = {
@@ -84,10 +87,12 @@ def handle_block(evaluate_response: EvaluateResponseV1):
         "rationale": evaluate_response.rationale_codes[0],
         "summary": "Action blocked. Access denied."
     }
+    end = perf_counter()
+    print(f"handle_block logic took: {end - start:.2f} seconds")
     return result
 
 def handle_require_review(evaluate_response: EvaluateResponseV1):
-
+    start = perf_counter()
     # Add REQUIRE_REVIEW logic here ...
 
     result = {
@@ -96,10 +101,12 @@ def handle_require_review(evaluate_response: EvaluateResponseV1):
         "rationale": evaluate_response.rationale_codes[0],
         "summary": "Action requires review. Access pending."
     }
+    end = perf_counter()
+    print(f"handle_require_review logic took: {end - start:.2f} seconds")
     return result
 
 def handle_degrade(evaluate_response: EvaluateResponseV1):
-
+    start = perf_counter()
     # Add DEGRADE logic here ...
     # For this case you would typically check and handle the obligations returned.
     # E.g., 'obligations': [{'type': 'OUTPUT_CAP', 'params': {'max_tokens': 200, 'max_items': None, 'max_bytes': None}} 
@@ -112,4 +119,6 @@ def handle_degrade(evaluate_response: EvaluateResponseV1):
         "obligations": evaluate_response.obligations,
         "summary": "Action degraded. Proceeded with limited functionality..."
     }
+    end = perf_counter()
+    print(f"handle_degrade logic took: {end - start:.2f} seconds")
     return result

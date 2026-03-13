@@ -1,5 +1,4 @@
 from __future__ import annotations
-
 from dataclasses import dataclass
 from typing import Any, Dict, List, Optional
 
@@ -47,6 +46,10 @@ def evaluate_decision(request_dict: Dict[str, Any], policy: Dict[str, Any]) -> D
 
     for rule in rules:
         when = rule["when"]
+
+        # Testing only !``
+       # print(f"When: {json.dumps(when['action'], indent=2)}, request_dict: {json.dumps(request_dict['action'], indent=2)}")
+
         if _match_when(request_dict, when):
             matches.append(rule)
 

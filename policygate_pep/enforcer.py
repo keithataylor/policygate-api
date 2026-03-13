@@ -1,3 +1,5 @@
+from time import perf_counter, time
+
 from policygate.models import Decision
 import requests
 from typing import Any, Callable
@@ -16,7 +18,10 @@ def post_json(url: str, payload: dict, timeout: int = 10) -> dict:
     '''
     try:
         with requests.Session() as session:
+            start = perf_counter()
             summarise_response = session.post(url=url, json=payload, timeout=timeout)
+            end = perf_counter()
+            print(f"session.post in post_json to {url} took {end - start:.2f} seconds")
             summarise_response.raise_for_status()
     except requests.exceptions.RequestException as e:
         print(f"An error occurred while making the request to the PEP: {e}")
@@ -77,11 +82,14 @@ def enforce(
 
     try:
         with requests.Session() as session:
+            start = perf_counter()
             response = session.post(
                 url=pdp_url,
                 json=evaluate_request,
                 timeout=timeout_seconds,
             )
+            end = perf_counter()
+            print(f"Timer: session.post in enforce to {pdp_url} took {end - start:.2f} seconds")
             response.raise_for_status()
     except requests.exceptions.RequestException as e:
         raise requests.exceptions.RequestException(
