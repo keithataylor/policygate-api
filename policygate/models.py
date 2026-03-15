@@ -22,6 +22,10 @@ class Decision(str, Enum):
     REQUIRE_REVIEW = "REQUIRE_REVIEW"
     DEGRADE = "DEGRADE"
 
+class ResourceSensitivity(str, Enum):
+    PUBLIC = "public"
+    INTERNAL = "internal"
+    RESTRICTED = "restricted"
 
 # ----- Request models -----
 
@@ -34,7 +38,7 @@ class Resource(BaseModel):
     model_config = ConfigDict(extra="forbid")
     type: str = Field(..., min_length=1, max_length=64)
     id: Optional[str] = Field(None, min_length=1, max_length=256)
-    sensitivity: str = Field(..., pattern="^(public|internal|restricted)$")
+    sensitivity: ResourceSensitivity
 
 
 class Subject(BaseModel):

@@ -6,7 +6,7 @@ from typing import Any, Callable
 from policygate.models import EvaluateResponseV1, Decision
 
 
-def post_json(url: str, payload: dict, timeout: int = 10) -> dict:
+def post_json(url: str, payload: dict, timeout: int = 10) -> requests.Response:
     '''
     Helper function to send a POST request with JSON payload and return the response as a dictionary.
     Args:
@@ -27,9 +27,7 @@ def post_json(url: str, payload: dict, timeout: int = 10) -> dict:
         print(f"An error occurred while making the request to the PEP: {e}")
         raise SystemExit(1)
 
-    print(f"Response status code: {summarise_response.status_code}, {summarise_response.reason}") 
-
-    return summarise_response.json()
+    return summarise_response
 
 
 
