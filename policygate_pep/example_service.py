@@ -42,8 +42,6 @@ async def summarise(payload: SummarisePayload):
     
     sim = SIMULATED_BUSINESS_CONTEXT
 
-    print(f"Sim: {sim}")
-
     # Use the mapper helper function to build the policy evaluation 
     # EvaluateRequestV1 request object required by the PDP /evaluate endpoint.
     eval_request = mapper.build_evaluate_request(
@@ -61,6 +59,9 @@ async def summarise(payload: SummarisePayload):
     )
       
     # Call the PEP enforcer with the evaluation request, PDP URL, and handlers for each possible decision.
+    # The handlers are essential for the PEP to enforce the PDP's decision. 
+    # The PEP will call the appropriate handler based on the decision in the PDP's response, 
+    # and pass the EvaluateResponseV1 object to the handler for it to use in its logic.
     result = pep.enforce(
         evaluate_request=eval_request.model_dump(),
         pdp_url=PDP_EVALUATE_URL,

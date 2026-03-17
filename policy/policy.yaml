@@ -54,3 +54,4 @@ rules:
       decision: "BLOCK"
       rationale_codes:
         - "TOOL_CALL_LOW_TRUST"
+  
