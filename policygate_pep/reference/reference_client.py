@@ -1,8 +1,4 @@
-from time import time
-
-from fastapi import Response
-
-import policygate_pep.enforcer as enforcer
+import policygate_pep.core.enforcer as enforcer
 
 # Example input payload for customer defined endpoint. 
 # This would normally be based on the actual data being processed by the service. 

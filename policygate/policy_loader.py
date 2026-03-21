@@ -2,6 +2,7 @@ import json
 from jsonschema import validate, ValidationError
 from typing import Any
 import yaml
+import hashlib
 
 from policygate.exceptions import (
   DuplicateRuleIdError, InvalidPriorityError, InvalidRationaleCodesError,
@@ -208,13 +209,26 @@ def _when_clauses_overlap(left: dict[str, Any], right: dict[str, Any]) -> bool:
     return True
     
 
+def _compute_policy_sha256(policy_path: str) -> str:
+    """
+    Compute the SHA-256 hash of the policy file content.
+    """
+    with open(policy_path, "rb") as f:
+        return hashlib.sha256(f.read()).hexdigest()
+
+
 
 def load_and_validate_policy(policy_path: str, schema_path: str) -> dict:
     """
     Load a policy from a YAML file, validate it against a JSON Schema, and perform additional semantic checks.
-    """
+    """ 
     policy = load_policy_file(policy_path)
-    validate_policy_schema(policy, schema_path)
-    validate_policy_semantics(policy)
 
+    validate_policy_schema(policy, schema_path)
+    
+    validate_policy_semantics(policy)
+    
+    policy_sha256 = _compute_policy_sha256(policy_path) 
+    policy["policy_sha256"] = policy_sha256
+    
     return policy
