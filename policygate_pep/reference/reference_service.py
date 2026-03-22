@@ -1,7 +1,7 @@
 import os
 from fastapi import FastAPI
 from pydantic import BaseModel
-from policygate.models import Action, EvaluateResponseV1
+from policygate.models import Action
 import policygate_pep.core.enforcer as pep
 import policygate_pep.core.mappers as mapper
 import policygate_pep.reference.reference_handlers as handlers
@@ -14,10 +14,10 @@ PDP_EVALUATE_URL = f"http://{POLICYGATE_EVAL_HOST}:{POLICYGATE_EVAL_PORT}/evalua
 # authenticated user/session, and/or resource metadata/store.
 SIMULATED_BUSINESS_CONTEXT = {
     "env_name": "dev",          # system/runtime derived, not normally posted by the end user
-    "user_id": "789",           # derived from auth/session/token, not normally posted in body
-    "sensitivity": "internal",  # derived from document metadata/store, not normally trusted from client body
+    "user_id": "257",           # derived from auth/session/token, not normally posted in body
+    "sensitivity": "public",  # derived from document metadata/store, not normally trusted from client body
     "caller_trust": "low",      # derived internally from trust/risk/auth context, not normally user-supplied. Omit signal if not available
-    "request_id": "247",        # optional correlation/request ID, usually generated upstream or by service middleware
+    "request_id": "222",        # optional correlation/request ID, usually generated upstream or by service middleware
     "subject_type": "user",     # derived from authenticated caller context
 }
 
@@ -26,16 +26,20 @@ class SummarisePayload(BaseModel):
     document_id: str
 
 # FastAPI app instance for the reference service that will call the PEP enforcer.
-pep_service_app = FastAPI()
+pep_app = FastAPI(title="PEP API")
+
+@pep_app.get("/")
+async def root():
+    return {"message": "PEP API ROOT!"}
 
 # Health endpoint to check if the service is running.
-@pep_service_app.get("/health")
+@pep_app.get("/health")
 async def health():
     return {"status": "OK"}  
 
 # Endpoint to handle a document summarisation ML inference requests. 
 # For ML inference, the action in the evaluation request is set to Action.INFER_RUN.
-@pep_service_app.post("/summarise")
+@pep_app.post("/summarise")
 async def summarise(payload: SummarisePayload): 
     """ Endpoint to handle document summarisation requests, with PEP enforcement. """
     

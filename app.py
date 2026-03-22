@@ -8,17 +8,17 @@ from policygate.policy_loader import load_and_validate_policy
 
 POLICY = load_and_validate_policy("policy/policy.yaml", "contracts/policy.schema.json") 
     
-app = FastAPI(title="PolicyGate API")
+pdp_app = FastAPI(title="PolicyGate API")
 
-@app.get("/")
+@pdp_app.get("/")
 async def root():
-    return {"message": "Welcome to the PolicyGat API!"}
+    return {"message": "Welcome to the PolicyGate API!"}
 
-@app.get("/health")
+@pdp_app.get("/health")
 async def health_check():    
     return {"status": "healthy"} 
 
-@app.post("/evaluate")
+@pdp_app.post("/evaluate")
 async def evaluate_policy(request: EvaluateRequestV1) -> EvaluateResponseV1:
 
     start = perf_counter()
@@ -33,13 +33,20 @@ async def evaluate_policy(request: EvaluateRequestV1) -> EvaluateResponseV1:
         correlation_id=correlation_id,
         decision=decision_result.decision, 
         rationale_codes=decision_result.rationale_codes,  
-        policy=PolicyRef(policy_id=POLICY['policy_id'], policy_version=POLICY["policy_version"]),
+        policy=PolicyRef(policy_id=POLICY['policy_id'], 
+                         policy_version=POLICY["policy_version"],
+                         policy_sha256=POLICY["policy_sha256"]),
         obligations=decision_result.obligations,
         matched_rule_id=decision_result.matched_rule_id,
     )
 
     end = perf_counter()
     print(f"Evaluate endpoint took: {end - start:.2f} seconds")
+
+    # Emit audit event for the evaluated decision
+    from policygate.audit import emit_audit_event
+    emit_audit_event(request, response)
+
 
     # Placeholder for policy evaluation logic
     print(f"Request action: {request.action}, resource: {request.resource}, subject: {request.subject}")

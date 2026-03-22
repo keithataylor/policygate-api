@@ -16,10 +16,12 @@ def post_json(url: str, payload: dict, timeout: int = 10) -> requests.Response:
         Returns: dict: The JSON response from the server as a dictionary.
         Raises: requests.exceptions.RequestException: If an error occurs while making the request.
     '''
+    
     try:
         with requests.Session() as session:
             start = perf_counter()
             summarise_response = session.post(url=url, json=payload, timeout=timeout)
+            print(f"Request sent to {url} with payload: {payload}")
             end = perf_counter()
             print(f"session.post in post_json to {url} took {end - start:.2f} seconds")
             summarise_response.raise_for_status()

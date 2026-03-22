@@ -111,6 +111,7 @@ class PolicyRef(BaseModel):
     model_config = ConfigDict(extra="forbid")
     policy_id: str = Field(..., min_length=1, max_length=128)
     policy_version: str = Field(..., min_length=1, max_length=128)
+    policy_sha256: str = Field(..., min_length=64, max_length=64, pattern="^[a-fA-F0-9]{64}$")
 
 
 class EvaluateResponseV1(BaseModel):
@@ -135,3 +136,5 @@ class EvaluateResponseV1(BaseModel):
         else:
             if self.obligations:
                 raise ValueError("obligations must be omitted unless decision=DEGRADE")
+            
+

@@ -1,6 +1,7 @@
 from pydantic import BaseModel, ConfigDict
 import datetime
 from typing import Any, Literal
+from policygate.models import PolicyRef
 
 
 class AuditEventBase(BaseModel):
@@ -10,21 +11,12 @@ class AuditEventBase(BaseModel):
     model_config = ConfigDict(extra="forbid")
     event_type: str
     event_version: str = "1.0"
-    occurred_at: datetime
+    occurred_at: datetime.datetime
     environment: str
     service_name: str
     request_id: str | None = None
     trace_id: str | None = None
     span_id: str | None = None
-
-
-class PolicyRef(BaseModel):
-    """ 
-    Reference to the policy that was evaluated, for audit events.
-    """
-    policy_id: str
-    policy_version: str | None = None
-    policy_sha256: str
 
 
 class EvaluationOutcome(BaseModel):
@@ -39,7 +31,7 @@ class EvaluationOutcome(BaseModel):
     rationale_codes: list[str]
 
 
-class DecisionAuditEvent(AuditEventBase, frozen=True):
+class DecisionAuditEvent(AuditEventBase):
   """
   Audit event emitted when a policy evaluation decision is made.
   """
