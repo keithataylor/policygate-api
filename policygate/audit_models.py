@@ -42,5 +42,5 @@ class DecisionAuditEvent(AuditEventBase):
   caller_id: str | None = None
   evaluation: EvaluationOutcome
   decision_context: dict[str, Any]
-  latency_ms: int | None = None
+  latency_ms: float | None = None
   

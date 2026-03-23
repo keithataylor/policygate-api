@@ -1,0 +1,1 @@
+SERVICE_NAME = "policygate-pdp"

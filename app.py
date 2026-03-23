@@ -7,7 +7,7 @@ import policygate.engine as engine
 from policygate.policy_loader import load_and_validate_policy  
 
 POLICY = load_and_validate_policy("policy/policy.yaml", "contracts/policy.schema.json") 
-    
+
 pdp_app = FastAPI(title="PolicyGate API")
 
 @pdp_app.get("/")
@@ -41,11 +41,11 @@ async def evaluate_policy(request: EvaluateRequestV1) -> EvaluateResponseV1:
     )
 
     end = perf_counter()
-    print(f"Evaluate endpoint took: {end - start:.2f} seconds")
+    print(f"Evaluate endpoint took: {end - start} seconds")
 
     # Emit audit event for the evaluated decision
     from policygate.audit import emit_audit_event
-    emit_audit_event(request, response)
+    emit_audit_event(request, response, latency_ms=(end - start) * 1000)
 
 
     # Placeholder for policy evaluation logic

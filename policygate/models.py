@@ -120,7 +120,6 @@ class EvaluateResponseV1(BaseModel):
     (Matches the intent of contracts/evaluate_response.schema.json.)
     """
     model_config = ConfigDict(extra="forbid")
-
     correlation_id: str = Field(..., min_length=1, max_length=128)
     decision: Decision
     rationale_codes: List[str] = Field(..., min_length=1)

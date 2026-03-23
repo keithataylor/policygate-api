@@ -1,23 +1,32 @@
 
-import datetime
-import logging
-import uuid
+import datetime, logging, uuid
 from policygate.models import EvaluateRequestV1, EvaluateResponseV1, PolicyRef
 from policygate.audit_models import DecisionAuditEvent, EvaluationOutcome
+from policygate.config import SERVICE_NAME
 
 logger = logging.getLogger("policygate.audit")
-logger.addHandler(logging.StreamHandler())
 logger.setLevel(logging.INFO)
+logger.propagate = False  
+if not logger.handlers:
+    logger.addHandler(logging.StreamHandler())
 
-def build_decision_audit_event(request: EvaluateRequestV1, response: EvaluateResponseV1) -> DecisionAuditEvent:
-    # Build and return a DecisionAuditEvent instance with relevant data 
 
+def build_decision_audit_event(request: EvaluateRequestV1, response: EvaluateResponseV1, latency_ms: float) -> DecisionAuditEvent:
+    """
+    Builds a DecisionAuditEvent based on the evaluation request and response.
+    Args:
+        request (EvaluateRequestV1): The original evaluation request.
+        response (EvaluateResponseV1): The response from the policy evaluation.
+        latency_ms (float): The latency of the evaluation in milliseconds.
+    Returns:
+        DecisionAuditEvent: The constructed audit event with all relevant details.
+    """
     audit_event = DecisionAuditEvent(
         event_type="policygate.decision.evaluated",
         event_version="1.0",
-        occurred_at=datetime.datetime.now(datetime.UTC),
+        occurred_at=datetime.datetime.now(datetime.timezone.utc),
         environment=request.env.name if request.env else "unknown",
-        service_name="request",  # Replace with actual service name
+        service_name=SERVICE_NAME,
         request_id=request.request_id or str(uuid.uuid4()),
         trace_id=None,
         span_id=None,
@@ -25,7 +34,7 @@ def build_decision_audit_event(request: EvaluateRequestV1, response: EvaluateRes
             policy_id=response.policy.policy_id,
             policy_version=response.policy.policy_version,
             policy_sha256=response.policy.policy_sha256
-        ),  # Include policy reference details
+        ), 
         tenant_id=None,
         caller_id=None,
         evaluation=EvaluationOutcome(
@@ -37,23 +46,24 @@ def build_decision_audit_event(request: EvaluateRequestV1, response: EvaluateRes
             rationale_codes=response.rationale_codes,
         ),
         decision_context={
-            "subject": request.subject,
-            "resource": request.resource,
-            "env": request.env,
-            "signals": request.signals if request.signals else {},
+            "resource": request.resource.model_dump() if request.resource else {},
+            "env": request.env.model_dump() if request.env else {},
+            "signals": request.signals,
         },
-        latency_ms=0,  # Placeholder for actual latency measurement
+        latency_ms=latency_ms,  # Placeholder for actual latency measurement
     )
     return audit_event
 
 
-def emit_audit_event( request: EvaluateRequestV1, response: EvaluateResponseV1) -> None:
-  # Emit the audit event to the desired destination (e.g., log, external system)
-  # policygate.decision.evaluated
-  # policygate.decision.error
-  # policygate.policy.loaded
-  # policygate.policy.rejected
-  audit_event = build_decision_audit_event(request, response)
+def emit_audit_event( request: EvaluateRequestV1, response: EvaluateResponseV1, latency_ms: float) -> None:
+  """
+  Emits an audit event for a policy evaluation decision.
+  Args:      
+    request (EvaluateRequestV1): The original evaluation request.
+    response (EvaluateResponseV1): The response from the policy evaluation.
+    latency_ms (float): The latency of the evaluation in milliseconds.
+  """
+  audit_event = build_decision_audit_event(request, response, latency_ms)
   logger.info(f"Emitting audit event: {audit_event.model_dump_json()}")
 
 
