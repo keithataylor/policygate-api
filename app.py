@@ -49,7 +49,6 @@ async def evaluate_policy(request: EvaluateRequestV1) -> EvaluateResponseV1:
     from policygate.audit import emit_audit_event
     emit_audit_event(request, response, latency_ms=(end - start) * 1000)
 
-
     # Placeholder for policy evaluation logic
     print(f"Request action: {request.action}, resource: {request.resource}, subject: {request.subject}")
     return response
