@@ -1,5 +1,8 @@
-from time import perf_counter, time
+"""
+PEP enforcer function to call the PDP and route to the correct handler based on the decision.
+"""
 
+from time import perf_counter, time
 from policygate.models import Decision
 import requests
 from typing import Any, Callable

@@ -1,5 +1,7 @@
+"""
+Main application file for the PolicyGate API.
+"""
 from time import perf_counter
-
 from fastapi import FastAPI
 from policygate.models import EvaluateRequestV1, EvaluateResponseV1, PolicyRef
 import uuid

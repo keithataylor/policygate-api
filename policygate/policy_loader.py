@@ -1,9 +1,12 @@
+"""
+Policy loading and validation for PolicyGate.
+"""
+
 import json
 from jsonschema import validate, ValidationError
 from typing import Any
 import yaml
 import hashlib
-
 from policygate.exceptions import (
   DuplicateRuleIdError, InvalidPriorityError, InvalidRationaleCodesError,
   ConflictingEqualPriorityOverlapError, RedundantEqualPriorityOverlapError

@@ -1,3 +1,7 @@
+"""
+Audit event models for PolicyGate.
+"""
+
 from pydantic import BaseModel, ConfigDict
 import datetime
 from typing import Any, Literal

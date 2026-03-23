@@ -1,8 +1,12 @@
+"""
+Audit event functions for PolicyGate.
+"""
 
 import datetime, logging, uuid
 from policygate.models import EvaluateRequestV1, EvaluateResponseV1, PolicyRef
 from policygate.audit_models import DecisionAuditEvent, EvaluationOutcome
 from policygate.config import SERVICE_NAME
+
 
 logger = logging.getLogger("policygate.audit")
 logger.setLevel(logging.INFO)

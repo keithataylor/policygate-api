@@ -1,12 +1,14 @@
-from __future__ import annotations
+"""
+Data models for the PolicyGate API, defined using Pydantic.
+"""
 
+from __future__ import annotations
 from enum import Enum
 from typing import Any, Dict, List, Optional, Union
-
 from pydantic import BaseModel, Field, ConfigDict, field_validator
 
 
-# ----- Enums (allowed values) -----
+# ----- Common enums and types -----
 
 class Action(str, Enum):
     INFER_RUN = "infer:run"

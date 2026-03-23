@@ -1,6 +1,11 @@
-from datetime import datetime
+"""
+Mappers to convert incoming request data into the format expected by the PDP /evaluate endpoint.
+"""
+
 import uuid
+from datetime import datetime
 from policygate.models import Action, Env, EvaluateRequestV1, Resource, Subject
+
 
 def build_evaluate_request( 
         *,

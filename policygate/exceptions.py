@@ -1,4 +1,6 @@
-# This module defines custom exceptions for handling semantic errors in policy definitions.
+"""
+Exceptions for PolicyGate.
+"""
 
 class PolicySemanticError(ValueError):
     pass

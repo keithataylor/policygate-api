@@ -1,7 +1,10 @@
-# Reference handlers for PEP to enforce the PDP decisions. 
-# Parameters: evaluate_response (EvaluateResponseV1): The response from the PDP /evaluate endpoint, parsed
-#   into the EvaluateResponseV1 model. This contains the decision, rationale codes, and any obligations returned by the PDP. 
-# Returns: (customer defined) E.g., dict : dictionary containing the outcome of enforcing the decision, which can be customized based on the service's needs.
+"""
+Reference handlers for enforcing PDP decisions in the PEP.
+This module defines handler functions that the PEP will call based on the decision returned by the PDP.
+The handlers contain the logic to enforce the decision, e.g., by allowing the action, blocking it, degrading it, or marking it for review. 
+The handlers receive the EvaluateResponseV1 from the PDP, which contains the decision, rationale codes, and any obligations, and can use 
+this information to determine how to enforce the decision.
+"""
 
 from policygate.models import EvaluateResponseV1
 

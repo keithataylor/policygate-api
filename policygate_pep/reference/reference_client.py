@@ -1,3 +1,8 @@
+"""
+Reference client code to demonstrate how a customer service would call 
+the PEP enforcer function to route requests based on PDP decisions.
+"""
+
 import policygate_pep.core.enforcer as enforcer
 
 # Example input payload for customer defined endpoint. 

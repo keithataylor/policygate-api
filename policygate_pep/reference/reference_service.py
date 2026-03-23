@@ -1,3 +1,12 @@
+"""
+Reference implementation of a Policy Enforcement Point (PEP) service that calls the PDP /evaluate endpoint
+to get a decision and routes to the correct handler based on the decision.
+
+This reference service is implemented using FastAPI and includes:
+- A /summarise endpoint that simulates a document summarisation ML inference operation, which is protected by the PEP.
+- The PEP enforcer function is called within the /summarise endpoint, which sends the evaluation request to the PDP 
+  and routes to the appropriate handler based on the decision.
+"""
 import os
 from fastapi import FastAPI
 from pydantic import BaseModel
@@ -6,6 +15,7 @@ import policygate_pep.core.enforcer as pep
 import policygate_pep.core.mappers as mapper
 import policygate_pep.reference.reference_handlers as handlers
 
+# Configuration for PDP URL, using environment variables with defaults for local testing.
 POLICYGATE_EVAL_HOST = os.getenv("POLICYGATE_EVAL_HOST", "127.0.0.1")
 POLICYGATE_EVAL_PORT = int(os.getenv("POLICYGATE_EVAL_PORT", "8000"))
 PDP_EVALUATE_URL = f"http://{POLICYGATE_EVAL_HOST}:{POLICYGATE_EVAL_PORT}/evaluate"
@@ -15,7 +25,7 @@ PDP_EVALUATE_URL = f"http://{POLICYGATE_EVAL_HOST}:{POLICYGATE_EVAL_PORT}/evalua
 SIMULATED_BUSINESS_CONTEXT = {
     "env_name": "dev",          # system/runtime derived, not normally posted by the end user
     "user_id": "257",           # derived from auth/session/token, not normally posted in body
-    "sensitivity": "public",  # derived from document metadata/store, not normally trusted from client body
+    "sensitivity": "public",    # derived from document metadata/store, not normally trusted from client body
     "caller_trust": "low",      # derived internally from trust/risk/auth context, not normally user-supplied. Omit signal if not available
     "request_id": "222",        # optional correlation/request ID, usually generated upstream or by service middleware
     "subject_type": "user",     # derived from authenticated caller context
@@ -30,7 +40,7 @@ pep_app = FastAPI(title="PEP API")
 
 @pep_app.get("/")
 async def root():
-    return {"message": "PEP API ROOT!"}
+    return {"message": "Welcome to the PEP API for document summarisation!"}
 
 # Health endpoint to check if the service is running.
 @pep_app.get("/health")
@@ -62,9 +72,6 @@ async def summarise(payload: SummarisePayload):
     )
       
     # Call the PEP enforcer with the evaluation request, PDP URL, and handlers for each possible decision.
-    # The handlers are essential for the PEP to enforce the PDP's decision. 
-    # The PEP will call the appropriate handler based on the decision in the PDP's response, 
-    # and pass the EvaluateResponseV1 object to the handler for it to use in its logic.
     result = pep.enforce(
         evaluate_request=eval_request.model_dump(),
         pdp_url=PDP_EVALUATE_URL,
