@@ -176,26 +176,23 @@ This code is intended to show two things clearly:
 - which PEP/scaffolding logic should remain stable so PDP decisions are enforced correctly
 - which customer-side files are expected to be adapted for business-specific behaviour
 
-The implemented split is:
+The intended split is:
 
 - stable PEP/enforcement scaffolding in `policygate_pep/core/`
 - adaptable reference/customer-side code in `policygate_pep/reference/`
 
-Reference code includes files such as:
+Reference code may include files such as:
 
-- `policygate_pep/core/enforcer.py`  
-  stable decision-dispatch logic that routes returned decisions to supplied handler callbacks
-
-- `policygate_pep/core/mapper.py`  
-  stable mapping/scaffolding support for deriving PolicyGate request context cleanly
-
-- `policygate_pep/reference/reference_service.py`  
+- `reference_service.py`  
   a reference customer/business service acting as the enforcement boundary
 
-- `policygate_pep/reference/reference_handlers.py`  
+- `enforcer.py`  
+  stable decision-dispatch logic that routes returned decisions to supplied handler callbacks
+
+- `reference_handlers.py`  
   reference customer-side handler stubs that can be copied, edited, or replaced
 
-- `policygate_pep/reference/reference_client.py`  
+- `reference_client.py`  
   a simple caller/test harness for the reference service
 
 The customer is not required to use fixed internal function names. The important contract is that the customer supplies handler callables compatible with the expected decision categories.

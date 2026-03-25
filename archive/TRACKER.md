@@ -1,8 +1,8 @@
 # PolicyGate Implementation Tracker
 
 ## Current focus
+- [ ] Implement structured decision audit events for completed PDP evaluations
 - [ ] Implement actual reference-service enforcement for `DEGRADE` / `OUTPUT_CAP`
-- [ ] Dockerise PolicyGate and prove the local container run path
 - [ ] Tighten reference integration code and docs around the customer-owned PEP/service pattern
 
 ## Positioning guardrails
@@ -61,13 +61,12 @@ This tracker should avoid drift into:
 
 ### M3 — Reference integration pattern
 - [x] Rename demo-style files toward reference naming
-- [x] Implement `policygate_pep/core/` and `policygate_pep/reference/` split
-- [x] Finalise `policygate_pep/reference/reference_service.py`
-- [x] Finalise `policygate_pep/reference/reference_client.py`
-- [x] Keep customer/business payloads business-shaped
-- [x] Keep mapping from business request -> `EvaluateRequestV1` inside the reference service
-- [x] Keep policy-relevant context derivation honest and explicit
-- [x] Document the reference service as customer-side integration code, not core PDP code
+- [ ] Finalise `policygate_pep/reference_service.py`
+- [ ] Finalise `policygate_pep/reference_client.py`
+- [ ] Keep customer/business payloads business-shaped
+- [ ] Keep mapping from business request -> `EvaluateRequestV1` inside the reference service
+- [ ] Keep policy-relevant context derivation honest and explicit
+- [ ] Document the reference service as customer-side integration code, not core PDP code
 
 ### M4 — Reference enforcement behaviour
 - [ ] Implement actual reference-service enforcement for:
@@ -80,12 +79,12 @@ This tracker should avoid drift into:
 - [ ] Ensure reference handlers return business responses directly and consistently
 
 ### M5 — Audit events and evidence quality
-- [x] Implement `policygate/audit_models.py`
-- [x] Implement `policygate/audit.py`
-- [x] Define frozen structured audit event models
-- [x] Emit one structured decision audit event per completed PDP evaluation
+- [ ] Implement `policygate/audit_models.py`
+- [ ] Implement `policygate/audit.py`
+- [ ] Define frozen structured audit event models
+- [ ] Emit one structured decision audit event per completed PDP evaluation
 - [ ] Emit policy load / policy rejection audit events
-- [x] Include in decision audit event:
+- [ ] Include in decision audit event:
   - occurrence timestamp
   - request correlation ID
   - decision
@@ -95,8 +94,7 @@ This tracker should avoid drift into:
   - policy fingerprint
   - minimal decision-relevant context
 - [ ] Validate emitted audit events against `contracts/audit_event.schema.json`
-- [x] Add unit tests for audit event construction, request ID handling, and logger emission
-- [ ] Keep PolicyGate inputs and audit records limited to policy-relevant, audit-safe attributes
+- [ ] Add tests proving sensitive/raw business payload is not emitted into audit records
 
 ### M6 — Concrete policy packs / use-case examples
 - [ ] Replace overly generic sample policy examples with concrete reference scenarios
@@ -128,10 +126,10 @@ This tracker should avoid drift into:
 - [ ] Broader governance workflow features
 
 ## Current priority order
-1. Docker + CI
+1. Audit events
 2. Reference enforcement completeness
 3. Concrete reference policy/use-case examples
-4. Policy load/rejection audit events and audit schema validation
+4. Docker + CI
 5. AWS deployment path
 
 ## Definition of near-term success
