@@ -8,6 +8,7 @@ import uuid
 import policygate.engine as engine
 from policygate.policy_loader import load_and_validate_policy  
 from policygate.audit import emit_audit_event
+from policygate.logging_config import app_logger
 
 POLICY = load_and_validate_policy("policy/policy.yaml", "contracts/policy.schema.json") 
 
@@ -45,11 +46,11 @@ async def evaluate_policy(request: EvaluateRequestV1) -> EvaluateResponseV1:
 
     end = perf_counter()
     elapsed_time = end - start
-    print(f"Evaluate endpoint took: {elapsed_time} seconds")
+    app_logger.info(f"Evaluate endpoint took: {elapsed_time} seconds")
 
     # Emit audit event for the evaluated decision
     emit_audit_event(request, response, latency_ms=(elapsed_time * 1000))
 
-    # Placeholder for policy evaluation logic
-    print(f"Request action: {request.action}, resource: {request.resource}, subject: {request.subject}")
+    app_logger.info(f"Request action: {request.action}, resource: {request.resource}, subject: {request.subject}")
+    
     return response

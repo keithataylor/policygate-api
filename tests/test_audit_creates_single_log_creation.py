@@ -1,6 +1,7 @@
 import requests
 import policygate.audit as audit
 from policygate.audit_models import DecisionAuditEvent
+from policygate.config import SERVICE_NAME
 from policygate.models import (
     Action, Env, EvaluateRequestV1, 
     Resource, ResourceSensitivity, 
@@ -30,10 +31,16 @@ def test_build_decision_audit_event_single_log_creation():
 
     audit_event = DecisionAuditEvent.model_validate(audit_event.model_dump())
 
-    assert len(audit.logger.handlers)  == 1
+    assert len(audit.audit_logger.handlers)  == 1
 
-    with patch.object(audit.logger, "info") as mock_info:
+    with patch.object(audit.audit_logger, "info") as mock_info:
         audit.emit_audit_event(request_data, response_data, 0.5)
         mock_info.assert_called_once()
-        assert mock_info.call_args[0][0].startswith("Emitting audit event: ")
+        #assert mock_info.call_args[0][0] == audit_event.model_dump_json()
+        logged_message = mock_info.call_args[0][0]
+        assert logged_message.startswith("{")
+        assert '"event_type":"policygate.decision.evaluated"' in logged_message
+        assert f'"service_name":"{SERVICE_NAME}"' in logged_message
+
+    
 

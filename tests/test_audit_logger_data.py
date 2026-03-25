@@ -2,5 +2,5 @@ import policygate.audit as audit
 
 
 def test_audit_logger_data():
-  assert audit.logger.name == "policygate.audit"
-  assert audit.logger.propagate is False
+  assert audit.audit_logger.name == "policygate.audit"
+  assert audit.audit_logger.propagate is False
