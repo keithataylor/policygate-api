@@ -1,5 +1,5 @@
 
-from datetime import datetime
+import time
 import logging
 
 
@@ -7,7 +7,7 @@ formatter = logging.Formatter(
     fmt="%(asctime)s %(levelname)s %(name)s %(message)s",
     datefmt="%Y-%m-%dT%H:%M:%SZ",
 )
-formatter.converter = datetime.time.gmtime
+formatter.converter = time.gmtime
 
 handler = logging.StreamHandler()
 handler.setFormatter(formatter)
