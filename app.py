@@ -7,6 +7,7 @@ from policygate.models import EvaluateRequestV1, EvaluateResponseV1, PolicyRef
 import uuid
 import policygate.engine as engine
 from policygate.policy_loader import load_and_validate_policy  
+from policygate.audit import emit_audit_event
 
 POLICY = load_and_validate_policy("policy/policy.yaml", "contracts/policy.schema.json") 
 
@@ -27,7 +28,7 @@ async def evaluate_policy(request: EvaluateRequestV1) -> EvaluateResponseV1:
 
     correlation_id = request.request_id or str(uuid.uuid4())
 
-    decision_result = engine.evaluate_decision(request.model_dump(), POLICY)  # Placeholder for actual policy evaluation logic
+    decision_result = engine.evaluate_decision(request.model_dump(), POLICY) 
 
     print(f"Decision: {decision_result}")
 
@@ -43,11 +44,11 @@ async def evaluate_policy(request: EvaluateRequestV1) -> EvaluateResponseV1:
     )
 
     end = perf_counter()
-    print(f"Evaluate endpoint took: {end - start} seconds")
+    elapsed_time = end - start
+    print(f"Evaluate endpoint took: {elapsed_time} seconds")
 
     # Emit audit event for the evaluated decision
-    from policygate.audit import emit_audit_event
-    emit_audit_event(request, response, latency_ms=(end - start) * 1000)
+    emit_audit_event(request, response, latency_ms=(elapsed_time * 1000))
 
     # Placeholder for policy evaluation logic
     print(f"Request action: {request.action}, resource: {request.resource}, subject: {request.subject}")

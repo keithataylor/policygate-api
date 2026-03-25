@@ -2,12 +2,11 @@
 PEP enforcer function to call the PDP and route to the correct handler based on the decision.
 """
 
-from time import perf_counter, time
 from policygate.models import Decision
 import requests
 from typing import Any, Callable
 from policygate.models import EvaluateResponseV1, Decision
-
+from policygate.logging_config import app_logger
 
 def post_json(url: str, payload: dict, timeout: int = 10) -> requests.Response:
     '''
@@ -22,14 +21,11 @@ def post_json(url: str, payload: dict, timeout: int = 10) -> requests.Response:
     
     try:
         with requests.Session() as session:
-            start = perf_counter()
             summarise_response = session.post(url=url, json=payload, timeout=timeout)
-            print(f"Request sent to {url} with payload: {payload}")
-            end = perf_counter()
-            print(f"session.post in post_json to {url} took {end - start:.2f} seconds")
+            app_logger.info(f"Request sent to {url} with payload: {payload}")
             summarise_response.raise_for_status()
     except requests.exceptions.RequestException as e:
-        print(f"An error occurred while making the request to the PEP: {e}")
+        app_logger.error(f"An error occurred while making the request to the PEP: {e}")
         raise SystemExit(1)
 
     return summarise_response
@@ -85,14 +81,11 @@ def enforce(
 
     try:
         with requests.Session() as session:
-            start = perf_counter()
             response = session.post(
                 url=pdp_url,
                 json=evaluate_request,
                 timeout=timeout_seconds,
             )
-            end = perf_counter()
-            print(f"Timer: session.post in enforce to {pdp_url} took {end - start:.2f} seconds")
             response.raise_for_status()
     except requests.exceptions.RequestException as e:
         raise requests.exceptions.RequestException(

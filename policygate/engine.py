@@ -6,6 +6,7 @@ Policy evaluation engine for PolicyGate.
 from __future__ import annotations
 from dataclasses import dataclass
 from typing import Any, Dict, List, Optional
+from policygate.logging_config import app_logger
 
 
 @dataclass(frozen=True)
@@ -66,7 +67,7 @@ def evaluate_decision(request_dict: Dict[str, Any], policy: Dict[str, Any]) -> D
             matched_rule_id=chosen["rule_id"],
         )
 
-    print(f"Policy Default Applied: {policy}")
+    app_logger.info(f"Policy Default Applied: {policy}")
     default = policy["default"]
     return DecisionResult(
         decision=default["decision"],

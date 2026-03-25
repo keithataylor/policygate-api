@@ -5,7 +5,7 @@ Data models for the PolicyGate API, defined using Pydantic.
 from __future__ import annotations
 from enum import Enum
 from typing import Any, Dict, List, Optional, Union
-from pydantic import BaseModel, Field, ConfigDict, field_validator
+from pydantic import BaseModel, Field, ConfigDict, model_validator, field_validator
 
 
 # ----- Common enums and types -----
@@ -88,19 +88,11 @@ class OutputCapParams(BaseModel):
     max_items: Optional[int] = Field(None, ge=1, le=1000000)
     max_bytes: Optional[int] = Field(None, ge=1, le=100000000)
 
-    @field_validator("max_bytes", "max_items", "max_tokens")
-    @classmethod
-    def _noop(cls, v):
-        return v
-
-    @field_validator("*")
-    @classmethod
-    def at_least_one(cls, v, info):  # pydantic v2 runs per-field; keep separate check below
-        return v
-
-    def model_post_init(self, __context: Any) -> None:
+    @model_validator(mode="after")
+    def check_at_least_one(self):
         if self.max_tokens is None and self.max_items is None and self.max_bytes is None:
             raise ValueError("OUTPUT_CAP.params must set at least one of max_tokens/max_items/max_bytes")
+        return self
 
 
 class Obligation(BaseModel):

@@ -2,6 +2,7 @@
 import json
 from pathlib import Path
 from typing import Any, Dict, List, Tuple
+from policygate.logging_config import app_logger
 
 SCHEMA_PATH = Path("contracts/policy.schema.json")
 OUT_PATH = Path("policy/SCHEMA.md")
@@ -148,7 +149,7 @@ def main() -> None:
         lines.append(md_table(cap_rows) + "\n")
 
     OUT_PATH.write_text("\n".join(lines).strip() + "\n", encoding="utf-8")
-    print(f"Wrote {OUT_PATH}")
+    app_logger.info(f"Wrote {OUT_PATH}")
 
 
 if __name__ == "__main__":

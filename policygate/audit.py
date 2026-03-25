@@ -2,17 +2,11 @@
 Audit event functions for PolicyGate.
 """
 
-import datetime, logging, uuid
+import datetime, uuid
 from policygate.models import EvaluateRequestV1, EvaluateResponseV1, PolicyRef
 from policygate.audit_models import DecisionAuditEvent, EvaluationOutcome
 from policygate.config import SERVICE_NAME
-
-
-logger = logging.getLogger("policygate.audit")
-logger.setLevel(logging.INFO)
-logger.propagate = False  
-if not logger.handlers:
-    logger.addHandler(logging.StreamHandler())
+from policygate.logging_config import audit_logger
 
 
 def build_decision_audit_event(request: EvaluateRequestV1, response: EvaluateResponseV1, latency_ms: float) -> DecisionAuditEvent:
@@ -68,8 +62,5 @@ def emit_audit_event( request: EvaluateRequestV1, response: EvaluateResponseV1, 
     latency_ms (float): The latency of the evaluation in milliseconds.
   """
   audit_event = build_decision_audit_event(request, response, latency_ms)
-  logger.info(f"Emitting audit event: {audit_event.model_dump_json()}")
-
-
-
-  
+  audit_logger.info(audit_event.model_dump_json())
+ 
