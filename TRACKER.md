@@ -1,8 +1,8 @@
 # PolicyGate Implementation Tracker
 
 ## Current focus
+- [ ] Implement structured decision audit events for completed PDP evaluations
 - [ ] Implement actual reference-service enforcement for `DEGRADE` / `OUTPUT_CAP`
-- [ ] Dockerise PolicyGate and prove the local container run path
 - [ ] Tighten reference integration code and docs around the customer-owned PEP/service pattern
 
 ## Positioning guardrails
@@ -14,6 +14,7 @@ This tracker should prioritise:
 - clean customer-side integration
 - AWS-oriented deployability
 - concrete reference use cases
+- proof of a standalone audited PDP service in a credible customer-environment AWS shape
 
 This tracker should avoid drift into:
 - broad MLOps platform features
@@ -61,13 +62,12 @@ This tracker should avoid drift into:
 
 ### M3 — Reference integration pattern
 - [x] Rename demo-style files toward reference naming
-- [x] Implement `policygate_pep/core/` and `policygate_pep/reference/` split
-- [x] Finalise `policygate_pep/reference/reference_service.py`
-- [x] Finalise `policygate_pep/reference/reference_client.py`
-- [x] Keep customer/business payloads business-shaped
-- [x] Keep mapping from business request -> `EvaluateRequestV1` inside the reference service
-- [x] Keep policy-relevant context derivation honest and explicit
-- [x] Document the reference service as customer-side integration code, not core PDP code
+- [ ] Finalise `policygate_pep/reference_service.py`
+- [ ] Finalise `policygate_pep/reference_client.py`
+- [ ] Keep customer/business payloads business-shaped
+- [ ] Keep mapping from business request -> `EvaluateRequestV1` inside the reference service
+- [ ] Keep policy-relevant context derivation honest and explicit
+- [ ] Document the reference service as customer-side integration code, not core PDP code
 
 ### M4 — Reference enforcement behaviour
 - [ ] Implement actual reference-service enforcement for:
@@ -80,12 +80,12 @@ This tracker should avoid drift into:
 - [ ] Ensure reference handlers return business responses directly and consistently
 
 ### M5 — Audit events and evidence quality
-- [x] Implement `policygate/audit_models.py`
-- [x] Implement `policygate/audit.py`
-- [x] Define frozen structured audit event models
-- [x] Emit one structured decision audit event per completed PDP evaluation
+- [ ] Implement `policygate/audit_models.py`
+- [ ] Implement `policygate/audit.py`
+- [ ] Define frozen structured audit event models
+- [ ] Emit one structured decision audit event per completed PDP evaluation
 - [ ] Emit policy load / policy rejection audit events
-- [x] Include in decision audit event:
+- [ ] Include in decision audit event:
   - occurrence timestamp
   - request correlation ID
   - decision
@@ -95,8 +95,7 @@ This tracker should avoid drift into:
   - policy fingerprint
   - minimal decision-relevant context
 - [ ] Validate emitted audit events against `contracts/audit_event.schema.json`
-- [x] Add unit tests for audit event construction, request ID handling, and logger emission
-- [ ] Keep PolicyGate inputs and audit records limited to policy-relevant, audit-safe attributes
+- [ ] Add tests proving sensitive/raw business payload is not emitted into audit records
 
 ### M6 — Concrete policy packs / use-case examples
 - [ ] Replace overly generic sample policy examples with concrete reference scenarios
@@ -107,17 +106,20 @@ This tracker should avoid drift into:
 - [ ] Make example policies visibly relevant to real inference-control use cases
 
 ### M7 — Docker + CI gate
-- [ ] Dockerfile builds
+- [x] Dockerfile builds
+- [x] Local container run path is proven
+- [x] Ensure reference service can be exercised locally alongside containerised PolicyGate
 - [ ] Docker Compose or equivalent local run path is clear
 - [ ] GitHub Actions: `pytest` + `ruff` + `mypy`/`pyright` + `docker build`
-- [ ] Ensure reference service can be exercised locally alongside PolicyGate
 
 ### M8 — AWS implementation-first deploy path
+- [ ] ECR image push path
 - [ ] ECS / Fargate / IAM / ALB deployment path
-- [ ] CloudWatch logs visible
+- [ ] CloudWatch logs visible for both operational and audit output
 - [ ] Clear environment variable configuration for PDP host/port and service integration
+- [ ] Prove the preferred AWS shape: standalone PDP service, customer-side reference caller flow, controlled ALB-backed access
 - [ ] Document the initial recommended deployment pattern as central PDP in customer AWS environment
-- [ ] Later: evaluate sidecar/service-adjacent deployment pattern where latency or topology justifies it
+- [ ] Later: evaluate service-adjacent deployment pattern where latency or topology justifies it
 
 ## Deferred / later only
 - [ ] Kubernetes deployment pattern
@@ -128,10 +130,10 @@ This tracker should avoid drift into:
 - [ ] Broader governance workflow features
 
 ## Current priority order
-1. Docker + CI
+1. Audit events
 2. Reference enforcement completeness
 3. Concrete reference policy/use-case examples
-4. Policy load/rejection audit events and audit schema validation
+4. Docker + CI
 5. AWS deployment path
 
 ## Definition of near-term success
@@ -145,3 +147,12 @@ PolicyGate should be able to demonstrate, end to end:
 - a structured audit event is emitted showing what was decided, why, and under which policy artifact
 
 That is the current target shape.
+
+## AWS proof checklist
+- [ ] PolicyGate image pushed to ECR
+- [ ] PolicyGate runs on ECS Fargate as a standalone PDP service
+- [ ] Service reachable through a controlled ALB-backed HTTP endpoint
+- [ ] CloudWatch shows both operational logs and structured audit output
+- [ ] Reference service can call deployed `POST /evaluate` successfully
+- [ ] End-to-end reference client -> reference service -> deployed PDP flow is demonstrated
+- [ ] Deployment shape remains narrow: PolicyGate decides, customer-side reference service maps and enforces

@@ -12,7 +12,7 @@ from fastapi import FastAPI
 from pydantic import BaseModel
 from policygate.models import Action
 import policygate_pep.core.enforcer as pep
-import policygate_pep.core.mappers as mapper
+import policygate_pep.core.mapper as mapper
 import policygate_pep.reference.reference_handlers as handlers
 
 # Configuration for PDP URL, using environment variables with defaults for local testing.

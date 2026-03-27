@@ -68,7 +68,8 @@ Typical flow:
 3. It calls `POST /evaluate` on PolicyGate
 4. PolicyGate returns a decision response, including decision, rationale codes, and any obligations
 5. The customer-side enforcer interprets that response and dispatches to the appropriate decision handler
-6. The service returns the business response
+6. A structured audit event is emitted for the completed evaluation
+7. The service returns the business response
 
 This separation keeps business payloads business-shaped while keeping policy decisioning generic and deterministic.
 
@@ -157,15 +158,16 @@ Initial deployment shape:
 
 - Dockerised service
 - AWS-oriented deployment path
-- suitable for ECS / Fargate / IAM / ALB based environments
+- standalone PDP service deployable to ECS / Fargate with IAM and CloudWatch logging
+- ALB-backed HTTP service shape for controlled internal or external caller access where required
 
 Likely deployment patterns over time:
 
-- central PDP service
-- service-adjacent deployment for lower latency
+- central PDP service behind a customer-owned service or gateway
+- service-adjacent deployment for lower latency where justified
 - later Kubernetes-aligned deployment patterns where needed
 
-PolicyGate is not positioned as a general public SaaS endpoint.
+PolicyGate is not positioned as a general public SaaS endpoint. The preferred proof shape is a standalone audited PDP service with customer-side mapping/enforcement and a clear caller flow through a customer-owned service boundary.
 
 ## Reference integration code
 
@@ -176,26 +178,23 @@ This code is intended to show two things clearly:
 - which PEP/scaffolding logic should remain stable so PDP decisions are enforced correctly
 - which customer-side files are expected to be adapted for business-specific behaviour
 
-The implemented split is:
+The intended split is:
 
 - stable PEP/enforcement scaffolding in `policygate_pep/core/`
 - adaptable reference/customer-side code in `policygate_pep/reference/`
 
-Reference code includes files such as:
+Reference code may include files such as:
 
-- `policygate_pep/core/enforcer.py`  
-  stable decision-dispatch logic that routes returned decisions to supplied handler callbacks
-
-- `policygate_pep/core/mapper.py`  
-  stable mapping/scaffolding support for deriving PolicyGate request context cleanly
-
-- `policygate_pep/reference/reference_service.py`  
+- `reference_service.py`  
   a reference customer/business service acting as the enforcement boundary
 
-- `policygate_pep/reference/reference_handlers.py`  
+- `enforcer.py`  
+  stable decision-dispatch logic that routes returned decisions to supplied handler callbacks
+
+- `reference_handlers.py`  
   reference customer-side handler stubs that can be copied, edited, or replaced
 
-- `policygate_pep/reference/reference_client.py`  
+- `reference_client.py`  
   a simple caller/test harness for the reference service
 
 The customer is not required to use fixed internal function names. The important contract is that the customer supplies handler callables compatible with the expected decision categories.
@@ -255,5 +254,6 @@ PolicyGate’s value is in providing:
 - auditable decision output
 - clean integration into customer-owned AI service boundaries
 - reference PEP scaffolding that helps customers enforce PDP outcomes correctly
+- a credible AWS deployment shape for a standalone PDP service
 
 That narrow boundary is deliberate.

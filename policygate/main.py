@@ -1,5 +1,5 @@
 """
-Main application file for the PolicyGate API.
+FastAPI entrypoint for the PolicyGate PDP service.
 """
 from time import perf_counter
 from fastapi import FastAPI
@@ -24,14 +24,14 @@ async def health_check():
 
 @pdp_app.post("/evaluate")
 async def evaluate_policy(request: EvaluateRequestV1) -> EvaluateResponseV1:
-
+    """
+    Evaluate a normalized policy request and return the PDP decision response.
+    """
     start = perf_counter()
 
     correlation_id = request.request_id or str(uuid.uuid4())
 
     decision_result = engine.evaluate_decision(request.model_dump(), POLICY) 
-
-    print(f"Decision: {decision_result}")
 
     response = EvaluateResponseV1(
         correlation_id=correlation_id,
@@ -46,9 +46,8 @@ async def evaluate_policy(request: EvaluateRequestV1) -> EvaluateResponseV1:
 
     end = perf_counter()
     elapsed_time = end - start
-    app_logger.info(f"Evaluate endpoint took: {elapsed_time} seconds")
+    app_logger.info(f"Evaluate request completed in {elapsed_time} seconds")
 
-    # Emit audit event for the evaluated decision
     emit_audit_event(request, response, latency_ms=(elapsed_time * 1000))
 
     app_logger.info(f"Request action: {request.action}, resource: {request.resource}, subject: {request.subject}")
