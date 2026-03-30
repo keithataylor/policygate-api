@@ -137,7 +137,7 @@ The aim is predictable enforcement, not flexible natural-language reasoning.
 
 ## Auditability and evidence
 
-PolicyGate is intended to produce structured, auditable decision records.
+PolicyGate emits structured decision audit events for completed PDP evaluations.
 
 A completed decision can be tied to:
 
@@ -148,18 +148,21 @@ A completed decision can be tied to:
 - policy identity / version / fingerprint
 - minimal decision-relevant context
 
-This supports runtime evidence and investigation without turning PolicyGate into a general logging platform.
+The current audit shape is intended to support runtime evidence and investigation without turning PolicyGate into a general logging platform.
 
 ## Deployment model
 
 PolicyGate is designed to be deployed into the customer environment.
 
-Initial deployment shape:
+Current proved deployment shape:
 
 - Dockerised service
-- AWS-oriented deployment path
-- standalone PDP service deployable to ECS / Fargate with IAM and CloudWatch logging
+- standalone PDP service deployed to AWS ECS / Fargate
+- ECR image push path
+- IAM task execution/task role separation
+- CloudWatch operational and structured audit logging
 - ALB-backed HTTP service shape for controlled internal or external caller access where required
+- successful end-to-end reference-service call flow into deployed `POST /evaluate`
 
 Likely deployment patterns over time:
 

@@ -1,9 +1,9 @@
 # PolicyGate Implementation Tracker
 
 ## Current focus
-- [ ] Implement structured decision audit events for completed PDP evaluations
-- [ ] Implement actual reference-service enforcement for `DEGRADE` / `OUTPUT_CAP`
 - [ ] Tighten reference integration code and docs around the customer-owned PEP/service pattern
+- [ ] Implement actual reference-service enforcement for `DEGRADE` / `OUTPUT_CAP`
+- [ ] Add CI quality gate around tests, linting, and Docker build
 
 ## Positioning guardrails
 PolicyGate is being built as a **deployable inference policy gate** for internal AI services and gateways.
@@ -50,7 +50,7 @@ This tracker should avoid drift into:
 - [x] Reject invalid equal-priority overlap at semantic validation stage
 - [ ] Add golden tests: request + policy -> exact decision response
 - [ ] Add a compact scenario matrix for representative inference-gate cases
-- [ ] Confirm policy fingerprint / identity is surfaced cleanly to downstream audit/event building
+- [x] Confirm policy fingerprint / identity is surfaced cleanly to downstream audit/event building
 
 ### M2 — API wiring (stable PDP boundary)
 - [x] Implement FastAPI `POST /evaluate`
@@ -58,7 +58,7 @@ This tracker should avoid drift into:
 - [x] Load policy once at startup
 - [x] Implement runtime Pydantic request/response models in `policygate/models.py`
 - [ ] Add `GET /version` or equivalent lightweight policy/app identity endpoint if useful
-- [ ] Ensure `/evaluate` response shape remains narrow and decision-focused
+- [x] Ensure `/evaluate` response shape remains narrow and decision-focused
 
 ### M3 — Reference integration pattern
 - [x] Rename demo-style files toward reference naming
@@ -67,7 +67,7 @@ This tracker should avoid drift into:
 - [ ] Keep customer/business payloads business-shaped
 - [ ] Keep mapping from business request -> `EvaluateRequestV1` inside the reference service
 - [ ] Keep policy-relevant context derivation honest and explicit
-- [ ] Document the reference service as customer-side integration code, not core PDP code
+- [x] Document the reference service as customer-side integration code, not core PDP code
 
 ### M4 — Reference enforcement behaviour
 - [ ] Implement actual reference-service enforcement for:
@@ -80,12 +80,12 @@ This tracker should avoid drift into:
 - [ ] Ensure reference handlers return business responses directly and consistently
 
 ### M5 — Audit events and evidence quality
-- [ ] Implement `policygate/audit_models.py`
-- [ ] Implement `policygate/audit.py`
-- [ ] Define frozen structured audit event models
-- [ ] Emit one structured decision audit event per completed PDP evaluation
+- [x] Implement `policygate/audit_models.py`
+- [x] Implement `policygate/audit.py`
+- [x] Define frozen structured audit event models
+- [x] Emit one structured decision audit event per completed PDP evaluation
 - [ ] Emit policy load / policy rejection audit events
-- [ ] Include in decision audit event:
+- [x] Include in decision audit event:
   - occurrence timestamp
   - request correlation ID
   - decision
@@ -113,11 +113,11 @@ This tracker should avoid drift into:
 - [ ] GitHub Actions: `pytest` + `ruff` + `mypy`/`pyright` + `docker build`
 
 ### M8 — AWS implementation-first deploy path
-- [ ] ECR image push path
-- [ ] ECS / Fargate / IAM / ALB deployment path
-- [ ] CloudWatch logs visible for both operational and audit output
+- [x] ECR image push path
+- [x] ECS / Fargate / IAM / ALB deployment path
+- [x] CloudWatch logs visible for both operational and audit output
 - [ ] Clear environment variable configuration for PDP host/port and service integration
-- [ ] Prove the preferred AWS shape: standalone PDP service, customer-side reference caller flow, controlled ALB-backed access
+- [x] Prove the preferred AWS shape: standalone PDP service, customer-side reference caller flow, controlled ALB-backed access
 - [ ] Document the initial recommended deployment pattern as central PDP in customer AWS environment
 - [ ] Later: evaluate service-adjacent deployment pattern where latency or topology justifies it
 
@@ -130,11 +130,11 @@ This tracker should avoid drift into:
 - [ ] Broader governance workflow features
 
 ## Current priority order
-1. Audit events
-2. Reference enforcement completeness
-3. Concrete reference policy/use-case examples
-4. Docker + CI
-5. AWS deployment path
+1. Reference enforcement completeness
+2. Concrete reference policy/use-case examples
+3. Docker + CI
+4. Deployment documentation tightening
+5. Later AWS hardening
 
 ## Definition of near-term success
 PolicyGate should be able to demonstrate, end to end:
@@ -149,10 +149,22 @@ PolicyGate should be able to demonstrate, end to end:
 That is the current target shape.
 
 ## AWS proof checklist
-- [ ] PolicyGate image pushed to ECR
-- [ ] PolicyGate runs on ECS Fargate as a standalone PDP service
-- [ ] Service reachable through a controlled ALB-backed HTTP endpoint
-- [ ] CloudWatch shows both operational logs and structured audit output
-- [ ] Reference service can call deployed `POST /evaluate` successfully
-- [ ] End-to-end reference client -> reference service -> deployed PDP flow is demonstrated
-- [ ] Deployment shape remains narrow: PolicyGate decides, customer-side reference service maps and enforces
+- [x] Build and publish PolicyGate container image to ECR
+- [x] Provision minimal networking/security required for runtime access
+- [x] Deploy PolicyGate PDP to ECS Fargate
+- [x] Expose PDP via ALB with working route to `/evaluate`
+- [x] Send app logs and structured audit logs to CloudWatch
+- [x] Configure runtime to load policy and start cleanly in AWS
+- [x] Prove reference service can call deployed PDP successfully
+- [x] Prove end-to-end deterministic evaluation flow with expected decision output
+- [x] Confirm deployed service/audit boundary matches current architecture and README
+
+## Later hardening / productionisation
+- [ ] Replace default VPC/subnets lookup with fully Terraform-managed VPC networking
+- [ ] Move Terraform state from local to remote backend (S3, with locking if used)
+- [ ] Tighten container image versioning/tagging strategy beyond mutable proof tags
+- [ ] Revisit ECR tag immutability policy
+- [ ] Revisit CloudWatch log retention period based on operational/audit needs
+- [ ] Consider longer-term log archival/export strategy if evidence retention requires it
+- [ ] Harden IAM permissions to least-privilege for task execution and runtime access
+- [ ] Review whether ALB/public exposure should later move to more restricted private topology
