@@ -29,7 +29,7 @@ This tracker should avoid drift into:
 - [x] `contracts/evaluate_request.schema.json`
 - [x] `contracts/evaluate_response.schema.json`
 - [x] `contracts/policy.schema.json`
-- [x] `contracts/audit_event.schema.json`
+- [ ] `contracts/audit_event.schema.json`
 - [x] `policy/policy.yaml`
 - [x] `policy/README.md`
 - [x] `policy/SCHEMA.md`
@@ -62,11 +62,11 @@ This tracker should avoid drift into:
 
 ### M3 — Reference integration pattern
 - [x] Rename demo-style files toward reference naming
-- [ ] Finalise `policygate_pep/reference_service.py`
-- [ ] Finalise `policygate_pep/reference_client.py`
-- [ ] Keep customer/business payloads business-shaped
-- [ ] Keep mapping from business request -> `EvaluateRequestV1` inside the reference service
-- [ ] Keep policy-relevant context derivation honest and explicit
+- [x] Finalise `policygate_pep/reference_service.py`
+- [x] Finalise `policygate_pep/reference_client.py`
+- [x] Keep customer/business payloads business-shaped
+- [x] Keep mapping from business request -> `EvaluateRequestV1` inside the reference service
+- [x] Keep policy-relevant context derivation honest and explicit
 - [x] Document the reference service as customer-side integration code, not core PDP code
 
 ### M4 — Reference enforcement behaviour
@@ -77,7 +77,7 @@ This tracker should avoid drift into:
   - `DEGRADE`
 - [ ] Implement `OUTPUT_CAP` handling with fail-closed behaviour where appropriate
 - [ ] Add end-to-end reference tests covering the full decision/enforcement path
-- [ ] Ensure reference handlers return business responses directly and consistently
+- [x] Ensure reference handlers return business responses directly and consistently
 
 ### M5 — Audit events and evidence quality
 - [x] Implement `policygate/audit_models.py`

@@ -4,6 +4,11 @@ PolicyGate is a deployable **inference policy gate** for internal AI services an
 
 It is delivered primarily as an **implementation-first package**: deployed into the customer environment and integrated into the customer’s own service boundary. PolicyGate provides deterministic policy decisioning through its core PDP service and includes reference PEP scaffolding to help customers enforce those decisions correctly.
 
+## Code availability / licensing
+
+This repository is publicly viewable for portfolio and evaluation purposes.
+No license is currently granted for reuse, modification, or redistribution of this code.
+
 ## Positioning
 
 PolicyGate is designed for organisations that need a **runtime decision point** in front of internal AI or inference workflows, where requests may need to be:

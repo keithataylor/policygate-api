@@ -6,7 +6,7 @@ flowchart TD
 
   subgraph REF["Customer-owned reference/business service"]
     RS[reference_service<br/>Business-shaped endpoint]
-    MAP[policygate_pep.core.mappers<br/>Map business request -> EvaluateRequestV1]
+    MAP[policygate_pep.core.mapper<br/>Map business request -> EvaluateRequestV1]
     ENF[policygate_pep.core.enforcer<br/>Interpret PDP decision and dispatch handler]
     HND[reference_handlers<br/>Business-side handler callbacks]
   end
@@ -40,8 +40,9 @@ flowchart TD
 
   RESP --> ENF
   ENF -->|ALLOW| HND
-  ENF -->|BLOCK| DENY[Deny / fail closed]
-  ENF -->|ALLOW + obligations| HND
+  ENF -->|BLOCK| HND
+  ENF -->|REQUIRE_REVIEW| HND
+  ENF -->|DEGRADE| HND
   HND --> OUT[Business response returned]
 
   ALB --> ECS
@@ -87,7 +88,7 @@ Typical flow:
 
 1. A client calls a customer-owned business or gateway endpoint.
 2. The reference/customer service receives the business request.
-3. `policygate_pep.core.mappers` derives a minimal `EvaluateRequestV1` from that request.
+3. `policygate_pep.core.mapper` derives a minimal `EvaluateRequestV1` from that request.
 4. The service calls `POST /evaluate` on PolicyGate.
 5. PolicyGate validates input, evaluates policy deterministically, and builds `EvaluateResponseV1`.
 6. PolicyGate emits one structured decision audit event for the completed evaluation.

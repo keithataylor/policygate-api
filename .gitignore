@@ -3,30 +3,32 @@ __pycache__/
 *.py[cod]
 .venv/
 venv/
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
 
 # Environment
 .env
 .env.*
+python.env
 
-# Docker
+# Logs
 *.log
-
-# MLflow
-mlruns/
-mlartifacts/
-
-# Data (local only)
-data/
 
 # Terraform
 .terraform/
 *.tfstate
 *.tfstate.*
 crash.log
+terraform.tfvars
+terraform.tfvars.json
+*.tfplan
+
+# Local/archive material
+/archive/
 
 # OS / editor
 .DS_Store
 .vscode/
 .idea/
-
-mlflow.db
+Thumbs.db
