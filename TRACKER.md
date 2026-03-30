@@ -168,3 +168,11 @@ That is the current target shape.
 - [ ] Consider longer-term log archival/export strategy if evidence retention requires it
 - [ ] Harden IAM permissions to least-privilege for task execution and runtime access
 - [ ] Review whether ALB/public exposure should later move to more restricted private topology
+- [ ] Add HTTPS/TLS termination on ALB and redirect HTTP to HTTPS
+- [ ] Add request-rate protection (for example WAF and/or other throttling controls)
+- [ ] Add ECS service autoscaling policy for higher concurrency/load
+- [ ] Define caller-authentication / service-to-service access pattern for PDP access
+- [ ] Review request timeout, body-size, and abuse-handling limits for the API
+- [ ] Review error handling and logging to avoid leaking unnecessary internal detail
+- [ ] Load test the deployed PDP path to establish safe throughput/concurrency limits
+- [ ] Add deployment health/alarm coverage for service availability and failure detection
